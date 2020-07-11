@@ -1,0 +1,32 @@
+#BeautifulSoup method
+import requests
+import time
+import re 
+import csv
+from bs4 import BeautifulSoup
+result=set()
+r = requests.get("https://en.m.wikipedia.org/wiki/List_of_Internet_top-level_domains")
+html = r.content
+soup = BeautifulSoup(html.decode('ascii','ignore'), 'html5lib')
+links = soup.findAll('a')
+for a in links:
+    q=a['href']
+    if q.startswith('http'):
+      result.add(q)
+
+list_result=list(result)
+
+# for item in list_result:
+  # f.writerow([item])
+f = csv.writer(open('URL_BeautifulSoup.csv','w'))
+f.writerow(['domain'])
+for item in list_result:
+  try:
+    req= requests.get(item,timeout=2)
+    if req.status_code == 200:
+      print(item)
+      f.writerow([item])
+      print("Website Exists")
+    
+  except Exception as e:
+    print("Website does not exist")
