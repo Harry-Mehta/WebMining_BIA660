@@ -1,0 +1,29 @@
+#RegularExp method
+
+import requests
+import re
+import csv
+
+result=[]
+r = requests.get("https://en.m.wikipedia.org/wiki/List_of_Internet_top-level_domains")
+match = re.findall(r'http+[://]+[0-9*a-z*0-9*]+\.+[\w.-]*', r.text)
+match = set(match)
+
+list_result=list(match)
+
+f = csv.writer(open('URL_RegEx.csv','w'))
+f.writerow(['domain'])
+for item in list_result:
+  try:
+    req= requests.get(item,timeout=2)
+    if req.status_code == 200:
+      print(item)
+      f.writerow([item])
+      print("Website Exists")
+    
+  except Exception as e:
+    print("Website does not exist")
+
+
+
+
