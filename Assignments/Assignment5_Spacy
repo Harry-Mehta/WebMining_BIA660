@@ -1,0 +1,69 @@
+import requests 
+import spacy
+from collections import Counter
+from bs4 import BeautifulSoup
+from html.parser import HTMLParser
+import string
+
+nlp = spacy.load("en_core_web_lg")
+
+url = requests.get('https://www.gutenberg.org/files/1342/1342-h/1342-h.htm')
+soup = BeautifulSoup(url.content,'lxml')
+
+for script in soup(["pre","script", "style"]):
+    script.extract()
+
+url_content = soup.get_text()
+
+text_file = open("book.txt", "w")
+text_file.write(str(url_content))
+text_file.close()
+
+doc = nlp(open("book.txt").read())
+
+tokenss = 0
+verbss = 0
+for token in doc:
+    tokenss = tokenss+1
+print("tokens:", tokenss)
+
+verb = [token.lemma_ for token in doc if token.pos_ == "VERB"]
+print("verbs:", len(verb))
+
+len(doc.ents)
+
+
+
+items = [x.text for x in doc.ents]
+most_occur = Counter(items).most_common(1)
+print("most freqent named entity : ", most_occur)
+
+sentence = []
+for sent in doc.sents:
+    sentence.append(sent.text)
+print("sentences:",len(sentence))       
+
+tenplus = [sent for sent in list(doc.sents) if len(sent) >= 10]
+highsim = 0
+        
+for i in range(len(tenplus)-1):
+    for j in range(i+1,len(tenplus)-1):
+        s1 = tenplus[i]
+        s2 = tenplus[j]
+sim = s1.similarity(s2)
+
+if sim > highsim and s1.text != s2.text and sim <.99:
+    s1high = i
+    s2high = j
+    highsim = sim
+    
+print('sentence 1 : {}'.format(tenplus[s1high].text))
+print('\n sentence 2 : {}'.format(tenplus[s2high].text))
+print('sentence 1 : {}'.format(highsim))
+
+x = []
+x = sentence[35]
+print("first word from 15th sentence: ",x.split()[0])
+print(x)
+x15=nlp(str(x.split()[0]))
+print("Vector representation of first word:",x15.vector)
